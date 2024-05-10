@@ -1,0 +1,27 @@
+{
+	"name": "output_dataset_switch_activity",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "linked_service_pipeline1",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"Folder": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": {
+					"value": "@dataset().Folder",
+					"type": "Expression"
+				},
+				"container": "output-data"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

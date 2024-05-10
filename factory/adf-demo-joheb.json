@@ -1,0 +1,9 @@
+{
+	"name": "adf-demo-joheb",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "f93f3304-1a4f-40cb-9c38-63418f972309",
+		"tenantId": "bfd97f21-5bf6-45df-a645-32492f4467dd"
+	}
+}

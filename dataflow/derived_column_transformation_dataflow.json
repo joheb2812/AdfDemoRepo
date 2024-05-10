@@ -1,0 +1,59 @@
+{
+	"name": "derived_column_transformation_dataflow",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "EmployeeDataset",
+						"type": "DatasetReference"
+					},
+					"name": "AllEmployees"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "OutputDataDatset",
+						"type": "DatasetReference"
+					},
+					"name": "NewJobTitleSink"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          employee_id as string,",
+				"          first_name as string,",
+				"          last_name as string,",
+				"          job_title as string,",
+				"          salary as string,",
+				"          reports_to as string,",
+				"          office_id as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> AllEmployees",
+				"AllEmployees derive(job_title = upper(job_title),",
+				"          NewJobTitle = iif(isNull(job_title), 'Unknown', upper(job_title))) ~> derivedColumn",
+				"derivedColumn sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          Name as string,",
+				"          Category as string,",
+				"          Status as string,",
+				"          Error as string",
+				"     ),",
+				"     partitionFileNames:['new_job_title_coloumn.csv'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> NewJobTitleSink"
+			]
+		}
+	}
+}

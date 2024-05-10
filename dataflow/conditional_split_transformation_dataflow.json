@@ -1,0 +1,119 @@
+{
+	"name": "conditional_split_transformation_dataflow",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "EmployeeDataset",
+						"type": "DatasetReference"
+					},
+					"name": "AllEmployees"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "OutputDataDatset",
+						"type": "DatasetReference"
+					},
+					"name": "Employee1sink"
+				},
+				{
+					"dataset": {
+						"referenceName": "OutputDataDatset",
+						"type": "DatasetReference"
+					},
+					"name": "Employee2sink"
+				},
+				{
+					"dataset": {
+						"referenceName": "OutputDataDatset",
+						"type": "DatasetReference"
+					},
+					"name": "Employee3sink"
+				},
+				{
+					"dataset": {
+						"referenceName": "OutputDataDatset",
+						"type": "DatasetReference"
+					},
+					"name": "Employee4sink"
+				}
+			],
+			"transformations": [
+				{
+					"name": "split1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          employee_id as string,",
+				"          first_name as string,",
+				"          last_name as string,",
+				"          job_title as string,",
+				"          salary as string,",
+				"          reports_to as string,",
+				"          office_id as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> AllEmployees",
+				"AllEmployees split(equals(office_id, '1'),",
+				"     equals(office_id, '2'),",
+				"     equals(office_id, '3'),",
+				"     equals(office_id, '4'),",
+				"     disjoint: false) ~> split1@(employee1, employee2, employee3, employee4)",
+				"split1@employee1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          Name as string,",
+				"          Category as string,",
+				"          Status as string,",
+				"          Error as string",
+				"     ),",
+				"     partitionFileNames:['employee1.csv'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> Employee1sink",
+				"split1@employee2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          Name as string,",
+				"          Category as string,",
+				"          Status as string,",
+				"          Error as string",
+				"     ),",
+				"     partitionFileNames:['employee2.csv'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> Employee2sink",
+				"split1@employee3 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          Name as string,",
+				"          Category as string,",
+				"          Status as string,",
+				"          Error as string",
+				"     ),",
+				"     partitionFileNames:['employee3.csv'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> Employee3sink",
+				"split1@employee4 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          Name as string,",
+				"          Category as string,",
+				"          Status as string,",
+				"          Error as string",
+				"     ),",
+				"     partitionFileNames:['employee4.csv'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> Employee4sink"
+			]
+		}
+	}
+}

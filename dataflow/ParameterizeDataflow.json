@@ -1,0 +1,61 @@
+{
+	"name": "ParameterizeDataflow",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "windowDataset",
+						"type": "DatasetReference"
+					},
+					"name": "Employees"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "OutputDataDatset",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "filterByDepartment"
+				}
+			],
+			"scriptLines": [
+				"parameters{",
+				"     DepName as string",
+				"}",
+				"source(output(",
+				"          empid as string,",
+				"          firstname as string,",
+				"          Gender as string,",
+				"          Country as string,",
+				"          salary as string,",
+				"          reportsto as string,",
+				"          department as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> Employees",
+				"Employees filter(department==$DepName) ~> filterByDepartment",
+				"filterByDepartment sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          Name as string,",
+				"          Category as string,",
+				"          Status as string,",
+				"          Error as string",
+				"     ),",
+				"     partitionFileNames:['ParameterData.csv'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> sink1"
+			]
+		}
+	}
+}

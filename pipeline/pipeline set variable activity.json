@@ -1,0 +1,56 @@
+{
+	"name": "pipeline set variable activity",
+	"properties": {
+		"activities": [
+			{
+				"name": "Set variable1",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var",
+					"value": "Cloud storage"
+				}
+			},
+			{
+				"name": "Set variable2",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Set variable1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "var2",
+					"value": {
+						"value": "@concat(variables('var'), 'Channel')",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"variables": {
+			"var": {
+				"type": "String"
+			},
+			"var2": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-04-30T07:21:49Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,100 @@
+{
+	"name": "NewBranchDataflow",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "empDataDataset",
+						"type": "DatasetReference"
+					},
+					"name": "employees"
+				},
+				{
+					"dataset": {
+						"referenceName": "depDataDataset",
+						"type": "DatasetReference"
+					},
+					"name": "department"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "OutputDataDatset",
+						"type": "DatasetReference"
+					},
+					"name": "EmpAndDep"
+				},
+				{
+					"dataset": {
+						"referenceName": "OutputDataDatset",
+						"type": "DatasetReference"
+					},
+					"name": "AggregatedEmp"
+				}
+			],
+			"transformations": [
+				{
+					"name": "EmployeeAggregate"
+				},
+				{
+					"name": "EmpAndDepartJoin"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          empId as string,",
+				"          name as string,",
+				"          country as string,",
+				"          department as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> employees",
+				"source(output(",
+				"          depId as string,",
+				"          department as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> department",
+				"employees aggregate(groupBy(department),",
+				"     TotalEmployees = count(empId)) ~> EmployeeAggregate",
+				"employees, department join(employees@department == depId,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> EmpAndDepartJoin",
+				"EmpAndDepartJoin sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          Name as string,",
+				"          Category as string,",
+				"          Status as string,",
+				"          Error as string",
+				"     ),",
+				"     partitionFileNames:['TotalEmployeesbyDep.csv'],",
+				"     dateFormat:'MM/dd/yyyy',",
+				"     timestampFormat:'MM/dd/yyyy HH:mm:ss',",
+				"     booleanFormat: ['true', 'false'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> EmpAndDep",
+				"EmployeeAggregate sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          Name as string,",
+				"          Category as string,",
+				"          Status as string,",
+				"          Error as string",
+				"     ),",
+				"     partitionFileNames:['AggregatedEmp.csv'],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> AggregatedEmp"
+			]
+		}
+	}
+}

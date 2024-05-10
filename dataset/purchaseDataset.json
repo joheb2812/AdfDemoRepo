@@ -1,0 +1,46 @@
+{
+	"name": "purchaseDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "linked_service_pipeline1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "purchase.csv",
+				"folderPath": "Input",
+				"container": "input-data"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "PO",
+				"type": "String"
+			},
+			{
+				"name": "Vendor",
+				"type": "String"
+			},
+			{
+				"name": "Apple",
+				"type": "String"
+			},
+			{
+				"name": "Mangos",
+				"type": "String"
+			},
+			{
+				"name": "Banana",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

@@ -1,0 +1,87 @@
+{
+	"name": "Set variable activity pipeline",
+	"properties": {
+		"activities": [
+			{
+				"name": "If Condition1",
+				"description": "",
+				"type": "IfCondition",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "False",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "Set variable2",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "varCondition",
+								"value": "This is false block"
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "Set variable1",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "varCondition",
+								"value": "This is True block"
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Set variable3",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "If Condition1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "finalVariable",
+					"value": {
+						"value": "@variables('varCondition')",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"variables": {
+			"varCondition": {
+				"type": "String"
+			},
+			"finalVariable": {
+				"type": "String"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2024-04-30T07:21:49Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

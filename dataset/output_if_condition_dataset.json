@@ -1,0 +1,27 @@
+{
+	"name": "output_if_condition_dataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "linked_service_pipeline1",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"outputFolder": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": {
+					"value": "@dataset().outputFolder",
+					"type": "Expression"
+				},
+				"container": "output-data"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
