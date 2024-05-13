@@ -1,0 +1,32 @@
+{
+	"name": "ReadJsonDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "linked_service_pipeline1",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": "Input",
+				"container": "input-data"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "depId",
+				"type": "String"
+			},
+			{
+				"name": "deparName",
+				"type": "String"
+			}
+		]
+	}
+}
