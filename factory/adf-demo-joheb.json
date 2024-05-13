@@ -1,5 +1,13 @@
 {
 	"name": "adf-demo-joheb",
+	"properties": {
+		"globalParameters": {
+			"fileName": {
+				"type": "string",
+				"value": " input-data / Input"
+			}
+		}
+	},
 	"location": "eastus",
 	"identity": {
 		"type": "SystemAssigned",
