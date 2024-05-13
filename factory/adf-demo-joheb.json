@@ -4,7 +4,7 @@
 		"globalParameters": {
 			"filePath": {
 				"type": "string",
-				"value": "input-data/Input/department.csv"
+				"value": "Containers/input-data/Input/department.csv"
 			}
 		}
 	},
