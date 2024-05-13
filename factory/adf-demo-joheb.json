@@ -1,5 +1,13 @@
 {
 	"name": "adf-demo-joheb",
+	"properties": {
+		"globalParameters": {
+			"filePath": {
+				"type": "string",
+				"value": "input-data/Input/department.csv"
+			}
+		}
+	},
 	"location": "eastus",
 	"identity": {
 		"type": "SystemAssigned",
