@@ -46,14 +46,17 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"variableName": "",
-					"value": ""
+					"variableName": "MaxSalary",
+					"value": {
+						"value": "@string(activity('Data flow1').output.runStatus.output.sink1.value[0].MaxSal)",
+						"type": "Expression"
+					}
 				}
 			}
 		],
-		"parameters": {
+		"variables": {
 			"MaxSalary": {
-				"type": "string"
+				"type": "String"
 			}
 		},
 		"annotations": []
