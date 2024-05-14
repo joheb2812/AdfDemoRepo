@@ -17,6 +17,9 @@
 		"linked_service_pipeline1_connectionString": {
 			"value": ""
 		},
+		"AzureBlobStorageLinkedService_connectionString": {
+			"value": ""
+		},
 		"Event trigger_properties_typeProperties_scope": {
 			"value": "/subscriptions/c974b48b-1951-425e-a786-1489f9bfde11/resourceGroups/Test/providers/Microsoft.Storage/storageAccounts/adfstorageajoheb"
 		}

@@ -24,6 +24,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'linked_service_pipeline1'"
 		},
+		"AzureBlobStorageLinkedService_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorageLinkedService'"
+		},
 		"Event trigger_properties_typeProperties_scope": {
 			"type": "string",
 			"defaultValue": "/subscriptions/c974b48b-1951-425e-a786-1489f9bfde11/resourceGroups/Test/providers/Microsoft.Storage/storageAccounts/adfstorageajoheb"
@@ -66,6 +70,9 @@
 					},
 					"linked_service_pipeline1_connectionString": {
 						"value": "[parameters('linked_service_pipeline1_connectionString')]"
+					},
+					"AzureBlobStorageLinkedService_connectionString": {
+						"value": "[parameters('AzureBlobStorageLinkedService_connectionString')]"
 					},
 					"Event trigger_properties_typeProperties_scope": {
 						"value": "[parameters('Event trigger_properties_typeProperties_scope')]"
