@@ -13,6 +13,120 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/PivotDataflow')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "newEmpDataset",
+								"type": "DatasetReference"
+							},
+							"name": "employees"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "OutputDataDatset",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
+						}
+					],
+					"transformations": [
+						{
+							"name": "pivot1"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          empId as string,",
+						"          name as string,",
+						"          gender as string,",
+						"          country as string,",
+						"          department as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> employees",
+						"employees pivot(groupBy(department),",
+						"     pivotBy(gender),",
+						"     {} = count(empId),",
+						"     columnNaming: '$N$V',",
+						"     lateral: true) ~> pivot1",
+						"pivot1 sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     partitionFileNames:['pivotData.csv'],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> sink1"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/RankDataflow')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "windowDataset",
+								"type": "DatasetReference"
+							},
+							"name": "Employees"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "OutputDataDatset",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
+						}
+					],
+					"transformations": [
+						{
+							"name": "RankOnSalary"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          empid as string,",
+						"          firstname as string,",
+						"          Gender as string,",
+						"          Country as string,",
+						"          salary as string,",
+						"          reportsto as string,",
+						"          department as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> Employees",
+						"Employees rank(asc(salary, true),",
+						"     output(Ranking as long),",
+						"     dense: true) ~> RankOnSalary",
+						"RankOnSalary sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     partitionFileNames:['RankingOnSalary.csv'],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> sink1"
+					]
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/SchemaDriftDataflow')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
@@ -59,12 +173,6 @@
 						"     booleanFormat: ['true', 'false']) ~> oldData",
 						"oldData sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
-						"     input(",
-						"          Name as string,",
-						"          Category as string,",
-						"          Status as string,",
-						"          Error as string",
-						"     ),",
 						"     partitionFileNames:['SchemaDrift.csv'],",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
@@ -124,12 +232,6 @@
 						"     skipDuplicateMapOutputs: true) ~> select1",
 						"select1 sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
-						"     input(",
-						"          Name as string,",
-						"          Category as string,",
-						"          Status as string,",
-						"          Error as string",
-						"     ),",
 						"     partitionFileNames:['selectEmpData.csv'],",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
@@ -183,12 +285,6 @@
 						"     caseInsensitive: true) ~> SortOnName",
 						"SortOnName sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
-						"     input(",
-						"          Name as string,",
-						"          Category as string,",
-						"          Status as string,",
-						"          Error as string",
-						"     ),",
 						"     partitionFileNames:['SortedEmplyeesData.csv'],",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
@@ -253,12 +349,6 @@
 						"     skipDuplicateMapOutputs: true) ~> select1",
 						"select1 sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
-						"     input(",
-						"          Name as string,",
-						"          Category as string,",
-						"          Status as string,",
-						"          Error as string",
-						"     ),",
 						"     partitionFileNames:['surrogateData.csv'],",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
@@ -315,12 +405,6 @@
 						"     No_of_employee = count(employee_id)) ~> aggregateOnOfficeId",
 						"aggregateOnOfficeId sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
-						"     input(",
-						"          Name as string,",
-						"          Category as string,",
-						"          Status as string,",
-						"          Error as string",
-						"     ),",
 						"     partitionFileNames:['totalEmpbyOffice.csv'],",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
@@ -424,12 +508,6 @@
 						"employee1, employee2, employee3, employee4 union(byName: true)~> unionAllEmployees",
 						"unionAllEmployees sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
-						"     input(",
-						"          Name as string,",
-						"          Category as string,",
-						"          Status as string,",
-						"          Error as string",
-						"     ),",
 						"     partitionFileNames:['AllUnionEmployeesData.csv'],",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
@@ -490,12 +568,6 @@
 						"     ignoreNullPivots: false) ~> unpivot1",
 						"unpivot1 sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
-						"     input(",
-						"          Name as string,",
-						"          Category as string,",
-						"          Status as string,",
-						"          Error as string",
-						"     ),",
 						"     partitionFileNames:['UnpivotData.csv'],",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
@@ -546,12 +618,6 @@
 						"     ignoreNoFilesFound: false) ~> Employee",
 						"Employee sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
-						"     input(",
-						"          Name as string,",
-						"          Category as string,",
-						"          Status as string,",
-						"          Error as string",
-						"     ),",
 						"     partitionFileNames:['ValidateSchema.csv'],",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
@@ -632,48 +698,24 @@
 						"     disjoint: false) ~> split1@(employee1, employee2, employee3, employee4)",
 						"split1@employee1 sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
-						"     input(",
-						"          Name as string,",
-						"          Category as string,",
-						"          Status as string,",
-						"          Error as string",
-						"     ),",
 						"     partitionFileNames:['employee1.csv'],",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
 						"     partitionBy('hash', 1)) ~> Employee1sink",
 						"split1@employee2 sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
-						"     input(",
-						"          Name as string,",
-						"          Category as string,",
-						"          Status as string,",
-						"          Error as string",
-						"     ),",
 						"     partitionFileNames:['employee2.csv'],",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
 						"     partitionBy('hash', 1)) ~> Employee2sink",
 						"split1@employee3 sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
-						"     input(",
-						"          Name as string,",
-						"          Category as string,",
-						"          Status as string,",
-						"          Error as string",
-						"     ),",
 						"     partitionFileNames:['employee3.csv'],",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
 						"     partitionBy('hash', 1)) ~> Employee3sink",
 						"split1@employee4 sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
-						"     input(",
-						"          Name as string,",
-						"          Category as string,",
-						"          Status as string,",
-						"          Error as string",
-						"     ),",
 						"     partitionFileNames:['employee4.csv'],",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
@@ -729,12 +771,6 @@
 						"Employee filter(equals(office_id, '1')) ~> FilterOfficeID",
 						"FilterOfficeID sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
-						"     input(",
-						"          Name as string,",
-						"          Category as string,",
-						"          Status as string,",
-						"          Error as string",
-						"     ),",
 						"     partitionFileNames:['filteredData.csv'],",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
@@ -791,12 +827,6 @@
 						"          NewJobTitle = iif(isNull(job_title), 'Unknown', upper(job_title))) ~> derivedColumn",
 						"derivedColumn sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
-						"     input(",
-						"          Name as string,",
-						"          Category as string,",
-						"          Status as string,",
-						"          Error as string",
-						"     ),",
 						"     partitionFileNames:['new_job_title_coloumn.csv'],",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
@@ -867,24 +897,12 @@
 						"     DenseRank = denseRank()) ~> window2",
 						"window1 sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
-						"     input(",
-						"          Name as string,",
-						"          Category as string,",
-						"          Status as string,",
-						"          Error as string",
-						"     ),",
 						"     partitionFileNames:['windowData.csv'],",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
 						"     partitionBy('hash', 1)) ~> sink1",
 						"window2 sink(allowSchemaDrift: true,",
 						"     validateSchema: false,",
-						"     input(",
-						"          Name as string,",
-						"          Category as string,",
-						"          Status as string,",
-						"          Error as string",
-						"     ),",
 						"     partitionFileNames:['denseRank.csv'],",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
@@ -895,65 +913,84 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/RankDataflow')]",
-			"type": "Microsoft.DataFactory/factories/dataflows",
+			"name": "[concat(parameters('factoryName'), '/SessionLogPipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"type": "MappingDataFlow",
-				"typeProperties": {
-					"sources": [
-						{
-							"dataset": {
-								"referenceName": "windowDataset",
-								"type": "DatasetReference"
+				"activities": [
+					{
+						"name": "Copy data1",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "JsonSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"wildcardFolderPath": "Input",
+									"wildcardFileName": "*.json",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "JsonReadSettings"
+								}
 							},
-							"name": "Employees"
-						}
-					],
-					"sinks": [
-						{
-							"dataset": {
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Info",
+									"enableReliableLogging": true
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "linked_service_pipeline1",
+										"type": "LinkedServiceReference"
+									},
+									"path": "output-data"
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "sessionDataset",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
 								"referenceName": "OutputDataDatset",
-								"type": "DatasetReference"
-							},
-							"name": "sink1"
-						}
-					],
-					"transformations": [
-						{
-							"name": "RankOnSalary"
-						}
-					],
-					"scriptLines": [
-						"source(output(",
-						"          empid as string,",
-						"          firstname as string,",
-						"          Gender as string,",
-						"          Country as string,",
-						"          salary as string,",
-						"          reportsto as string,",
-						"          department as string",
-						"     ),",
-						"     allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     ignoreNoFilesFound: false) ~> Employees",
-						"Employees rank(asc(salary, true),",
-						"     output(Ranking as long),",
-						"     dense: true) ~> RankOnSalary",
-						"RankOnSalary sink(allowSchemaDrift: true,",
-						"     validateSchema: false,",
-						"     input(",
-						"          Name as string,",
-						"          Category as string,",
-						"          Status as string,",
-						"          Error as string",
-						"     ),",
-						"     partitionFileNames:['RankingOnSalary.csv'],",
-						"     skipDuplicateMapInputs: true,",
-						"     skipDuplicateMapOutputs: true,",
-						"     partitionBy('hash', 1)) ~> sink1"
-					]
-				}
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
 			},
 			"dependsOn": []
 		},
@@ -1197,98 +1234,6 @@
 				"lastPublishTime": "2024-05-09T09:30:17Z"
 			},
 			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/PivotPipeline')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Pivot Data flow",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "PivotDataflow",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"employees": {},
-									"sink1": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"annotations": [],
-				"lastPublishTime": "2024-05-08T07:02:33Z"
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/SchemaDriftPipeline')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "SchemaDriftData flow",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "SchemaDriftDataflow",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"oldData": {},
-									"sink1": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "Fine"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"annotations": [],
-				"lastPublishTime": "2024-05-09T10:30:02Z"
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/SchemaDriftDataflow')]"
-			]
 		}
 	]
 }
