@@ -10,7 +10,6 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"folderPath": "output",
 				"container": "output-data"
 			},
 			"columnDelimiter": ",",
@@ -18,24 +17,7 @@
 			"firstRowAsHeader": true,
 			"quoteChar": "\""
 		},
-		"schema": [
-			{
-				"name": "Name",
-				"type": "String"
-			},
-			{
-				"name": "Category",
-				"type": "String"
-			},
-			{
-				"name": "Status",
-				"type": "String"
-			},
-			{
-				"name": "Error",
-				"type": "String"
-			}
-		]
+		"schema": []
 	},
 	"type": "Microsoft.DataFactory/factories/datasets"
 }

@@ -63,12 +63,6 @@
 				"     broadcast: 'auto')~> EmpAndOffice",
 				"EmpAndOffice sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     input(",
-				"          Name as string,",
-				"          Category as string,",
-				"          Status as string,",
-				"          Error as string",
-				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
 				"     partitionBy('hash', 1)) ~> EmpAndOfficeOutput"
