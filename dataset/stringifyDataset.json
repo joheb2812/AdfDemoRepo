@@ -1,0 +1,44 @@
+{
+	"name": "stringifyDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorageLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "stringify.json",
+				"folderPath": "old_data",
+				"container": "input-data"
+			}
+		},
+		"schema": {
+			"type": "object",
+			"properties": {
+				"Name": {
+					"type": "string"
+				},
+				"Skills": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"Contact": {
+					"type": "object",
+					"properties": {
+						"mobile": {
+							"type": "string"
+						},
+						"Landline": {
+							"type": "string"
+						}
+					}
+				}
+			}
+		}
+	}
+}
