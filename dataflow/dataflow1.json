@@ -49,7 +49,6 @@
 				"     nullValue: '') ~> parseSkills",
 				"parseSkills parse(ParseAddress = address ? (City as string,",
 				"          Country as string),",
-				"     partitionBy('hash', 1),",
 				"     format: 'json',",
 				"     documentForm: 'singleDocument') ~> parseAddress",
 				"parseAddress sink(allowSchemaDrift: true,",
