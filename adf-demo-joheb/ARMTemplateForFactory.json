@@ -11,6 +11,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage1'"
 		},
+		"AzureBlobStorageLinkedService_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorageLinkedService'"
+		},
 		"SqlServer1_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'SqlServer1'",
@@ -23,10 +27,6 @@
 		"linked_service_pipeline1_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'linked_service_pipeline1'"
-		},
-		"AzureBlobStorageLinkedService_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorageLinkedService'"
 		},
 		"Event trigger_properties_typeProperties_scope": {
 			"type": "string",
@@ -696,6 +696,92 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/SessionLogPipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy data1",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "JsonSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"wildcardFolderPath": "Input",
+									"wildcardFileName": "*.json",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "JsonReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Info",
+									"enableReliableLogging": true
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "linked_service_pipeline1",
+										"type": "LinkedServiceReference"
+									},
+									"path": "output-data"
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "sessionDataset",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "OutputDataDatset",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/sessionDataset')]",
+				"[concat(variables('factoryId'), '/datasets/OutputDataDatset')]",
+				"[concat(variables('factoryId'), '/linkedServices/linked_service_pipeline1')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/Set variable activity pipeline')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -1024,6 +1110,84 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/dataflows/windowDataflow')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/WriteCacheSinkPipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Data flow1",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "maxSalaryDataflow",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"emp": {},
+									"sink1": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "None",
+							"cacheSinks": {
+								"firstRowOnly": true
+							}
+						}
+					},
+					{
+						"name": "Set variable1",
+						"type": "SetVariable",
+						"dependsOn": [
+							{
+								"activity": "Data flow1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "MaxSalary",
+							"value": {
+								"value": "@string(activity('Data flow1').output.runStatus.output.sink1.value[0].MaxSal)",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"MaxSalary": {
+						"type": "String"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/maxSalaryDataflow')]"
 			]
 		},
 		{
@@ -3541,6 +3705,56 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/maxSalaryDataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorageLinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "emp_window.csv",
+						"folderPath": "Input",
+						"container": "input-data"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "empId",
+						"type": "String"
+					},
+					{
+						"name": "name",
+						"type": "String"
+					},
+					{
+						"name": "gender",
+						"type": "String"
+					},
+					{
+						"name": "country",
+						"type": "String"
+					},
+					{
+						"name": "department",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorageLinkedService')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/newEmpDataset')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -3765,6 +3979,30 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/sessionDataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "linked_service_pipeline1",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "Input",
+						"container": "input-data"
+					}
+				},
+				"schema": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/linked_service_pipeline1')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/windowDataset')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -3836,6 +4074,19 @@
 				"type": "AzureBlobStorage",
 				"typeProperties": {
 					"connectionString": "[parameters('AzureBlobStorage1_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureBlobStorageLinkedService')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('AzureBlobStorageLinkedService_connectionString')]"
 				}
 			},
 			"dependsOn": []
@@ -5436,6 +5687,61 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/maxSalaryDataflow')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "maxSalaryDataset",
+								"type": "DatasetReference"
+							},
+							"name": "emp"
+						}
+					],
+					"sinks": [
+						{
+							"name": "sink1"
+						}
+					],
+					"transformations": [
+						{
+							"name": "aggregateOnSalary"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          empid as short,",
+						"          firstname as string,",
+						"          Gender as string,",
+						"          Country as string,",
+						"          salary as integer,",
+						"          reportsto as string,",
+						"          department as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     partitionBy('hash', 1)) ~> emp",
+						"emp aggregate(MaxSal = max(toInteger(salary))) ~> aggregateOnSalary",
+						"aggregateOnSalary sink(validateSchema: false,",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     store: 'cache',",
+						"     format: 'inline',",
+						"     output: true,",
+						"     saveOrder: 1) ~> sink1"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/maxSalaryDataset')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/windowDataflow')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
@@ -5515,195 +5821,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/SessionLogPipeline')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Copy data1",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "JsonSource",
-								"storeSettings": {
-									"type": "AzureBlobStorageReadSettings",
-									"recursive": true,
-									"wildcardFolderPath": "Input",
-									"wildcardFileName": "*.json",
-									"enablePartitionDiscovery": false
-								},
-								"formatSettings": {
-									"type": "JsonReadSettings"
-								}
-							},
-							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobStorageWriteSettings"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".txt"
-								}
-							},
-							"enableStaging": false,
-							"logSettings": {
-								"enableCopyActivityLog": true,
-								"copyActivityLogSettings": {
-									"logLevel": "Info",
-									"enableReliableLogging": true
-								},
-								"logLocationSettings": {
-									"linkedServiceName": {
-										"referenceName": "linked_service_pipeline1",
-										"type": "LinkedServiceReference"
-									},
-									"path": "output-data"
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "sessionDataset",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "OutputDataDatset",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						]
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/sessionDataset')]",
-				"[concat(variables('factoryId'), '/datasets/OutputDataDatset')]",
-				"[concat(variables('factoryId'), '/linkedServices/linked_service_pipeline1')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/sessionDataset')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "linked_service_pipeline1",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "Json",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"folderPath": "Input",
-						"container": "input-data"
-					}
-				},
-				"schema": {}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/linked_service_pipeline1')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/WriteCacheSinkPipeline')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Data flow1",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "maxSalaryDataflow",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"emp": {},
-									"sink1": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							},
-							"traceLevel": "None",
-							"cacheSinks": {
-								"firstRowOnly": true
-							}
-						}
-					},
-					{
-						"name": "Set variable1",
-						"type": "SetVariable",
-						"dependsOn": [
-							{
-								"activity": "Data flow1",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"variableName": "MaxSalary",
-							"value": {
-								"value": "@string(activity('Data flow1').output.runStatus.output.sink1.value[0].MaxSal)",
-								"type": "Expression"
-							}
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"variables": {
-					"MaxSalary": {
-						"type": "String"
-					}
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/dataflows/maxSalaryDataflow')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/maxSalaryDataflow')]",
+			"name": "[concat(parameters('factoryName'), '/Parsedataflow')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -5712,66 +5830,74 @@
 					"sources": [
 						{
 							"dataset": {
-								"referenceName": "maxSalaryDataset",
+								"referenceName": "parseDataset",
 								"type": "DatasetReference"
 							},
-							"name": "emp"
+							"name": "source1"
 						}
 					],
 					"sinks": [
 						{
+							"dataset": {
+								"referenceName": "OutputDataDatset",
+								"type": "DatasetReference"
+							},
 							"name": "sink1"
 						}
 					],
 					"transformations": [
 						{
-							"name": "aggregateOnSalary"
+							"name": "parseSkills"
+						},
+						{
+							"name": "parseAddress"
 						}
 					],
 					"scriptLines": [
 						"source(output(",
-						"          empid as short,",
-						"          firstname as string,",
-						"          Gender as string,",
-						"          Country as string,",
-						"          salary as integer,",
-						"          reportsto as string,",
-						"          department as string",
+						"          empId as short,",
+						"          empName as string,",
+						"          skills as string,",
+						"          address as string",
 						"     ),",
 						"     allowSchemaDrift: true,",
 						"     validateSchema: false,",
-						"     ignoreNoFilesFound: false,",
-						"     partitionBy('hash', 1)) ~> emp",
-						"emp aggregate(MaxSal = max(toInteger(salary))) ~> aggregateOnSalary",
-						"aggregateOnSalary sink(validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> source1",
+						"source1 parse(ParseSkills = skills ? (skill1 as string,",
+						"          skill2 as string,",
+						"          skill3 as string),",
+						"     partitionBy('hash', 1),",
+						"     format: 'delimited',",
+						"     columnNamesAsHeader: false,",
+						"     columnDelimiter: '|',",
+						"     nullValue: '') ~> parseSkills",
+						"parseSkills parse(ParseAddress = address ? (City as string,",
+						"          Country as string),",
+						"     format: 'json',",
+						"     documentForm: 'singleDocument') ~> parseAddress",
+						"parseAddress sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
 						"     skipDuplicateMapInputs: true,",
 						"     skipDuplicateMapOutputs: true,",
-						"     store: 'cache',",
-						"     format: 'inline',",
-						"     output: true,",
-						"     saveOrder: 1) ~> sink1"
+						"     mapColumn(",
+						"          empId,",
+						"          empName,",
+						"          Skill_1 = ParseSkills.skill1,",
+						"          Skill_2 = ParseSkills.skill2,",
+						"          Skill_3 = ParseSkills.skill3,",
+						"          City = ParseAddress.City,",
+						"          Country = ParseAddress.Country",
+						"     )) ~> sink1"
 					]
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/maxSalaryDataset')]"
+				"[concat(variables('factoryId'), '/datasets/parseDataset')]",
+				"[concat(variables('factoryId'), '/datasets/OutputDataDatset')]"
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/AzureBlobStorageLinkedService')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobStorage",
-				"typeProperties": {
-					"connectionString": "[parameters('AzureBlobStorageLinkedService_connectionString')]"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/maxSalaryDataset')]",
+			"name": "[concat(parameters('factoryName'), '/parseDataset')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -5784,8 +5910,8 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobStorageLocation",
-						"fileName": "emp_window.csv",
-						"folderPath": "Input",
+						"fileName": "parse_data.csv",
+						"folderPath": "old_data",
 						"container": "input-data"
 					},
 					"columnDelimiter": ",",
@@ -5799,25 +5925,67 @@
 						"type": "String"
 					},
 					{
-						"name": "name",
+						"name": "empName",
 						"type": "String"
 					},
 					{
-						"name": "gender",
+						"name": "skills",
 						"type": "String"
 					},
 					{
-						"name": "country",
-						"type": "String"
-					},
-					{
-						"name": "department",
+						"name": "address",
 						"type": "String"
 					}
 				]
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorageLinkedService')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ParsePipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "parseData flow1",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "Parsedataflow",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"source1": {},
+									"sink1": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/Parsedataflow')]"
 			]
 		}
 	]

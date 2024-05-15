@@ -11,6 +11,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage1'"
 		},
+		"AzureBlobStorageLinkedService_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorageLinkedService'"
+		},
 		"SqlServer1_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'SqlServer1'",
@@ -23,10 +27,6 @@
 		"linked_service_pipeline1_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'linked_service_pipeline1'"
-		},
-		"AzureBlobStorageLinkedService_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorageLinkedService'"
 		},
 		"Event trigger_properties_typeProperties_scope": {
 			"type": "string",
@@ -62,6 +62,9 @@
 					"AzureBlobStorage1_connectionString": {
 						"value": "[parameters('AzureBlobStorage1_connectionString')]"
 					},
+					"AzureBlobStorageLinkedService_connectionString": {
+						"value": "[parameters('AzureBlobStorageLinkedService_connectionString')]"
+					},
 					"SqlServer1_connectionString": {
 						"value": "[parameters('SqlServer1_connectionString')]"
 					},
@@ -70,9 +73,6 @@
 					},
 					"linked_service_pipeline1_connectionString": {
 						"value": "[parameters('linked_service_pipeline1_connectionString')]"
-					},
-					"AzureBlobStorageLinkedService_connectionString": {
-						"value": "[parameters('AzureBlobStorageLinkedService_connectionString')]"
 					},
 					"Event trigger_properties_typeProperties_scope": {
 						"value": "[parameters('Event trigger_properties_typeProperties_scope')]"
@@ -159,6 +159,26 @@
 			},
 			"dependsOn": [
 				"[resourceId('Microsoft.Resources/deployments', 'adf-demo-joheb_ArmTemplate_3')]"
+			]
+		},
+		{
+			"name": "adf-demo-joheb_ArmTemplate_5",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_5.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'adf-demo-joheb_ArmTemplate_4')]"
 			]
 		}
 	]
