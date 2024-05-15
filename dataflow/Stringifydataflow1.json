@@ -1,5 +1,5 @@
 {
-	"name": "dataflow1",
+	"name": "Stringifydataflow1",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
