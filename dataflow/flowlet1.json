@@ -1,0 +1,45 @@
+{
+	"name": "flowlet1",
+	"properties": {
+		"type": "Flowlet",
+		"typeProperties": {
+			"sources": [],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "aggregate1"
+				},
+				{
+					"name": "input1"
+				},
+				{
+					"name": "output1"
+				}
+			],
+			"scriptLines": [
+				"input(output(",
+				"          empId as string,",
+				"          name as string,",
+				"          gender as string,",
+				"          country as string,",
+				"          department as string",
+				"     ),",
+				"     order: 0,",
+				"     allowSchemaDrift: true) ~> input1",
+				"input1 aggregate(groupBy(empId,",
+				"          name,",
+				"          gender,",
+				"          country,",
+				"          department),",
+				"     count = count()) ~> aggregate1",
+				"aggregate1 output(mapColumn(",
+				"          empId,",
+				"          name,",
+				"          gender,",
+				"          country,",
+				"          department",
+				"     )) ~> output1"
+			]
+		}
+	}
+}
