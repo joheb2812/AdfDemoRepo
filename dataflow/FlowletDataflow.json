@@ -1,5 +1,5 @@
 {
-	"name": "dataflow1",
+	"name": "FlowletDataflow",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
@@ -14,6 +14,10 @@
 			],
 			"sinks": [
 				{
+					"dataset": {
+						"referenceName": "OutputDataDatset",
+						"type": "DatasetReference"
+					},
 					"name": "sink1"
 				}
 			],
@@ -46,8 +50,10 @@
 				"     composition: 'flowlet1') ~> flowlet1@(output1)",
 				"flowlet1@output1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
+				"     partitionFileNames:['flowletData.csv'],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> sink1"
+				"     skipDuplicateMapOutputs: true,",
+				"     partitionBy('hash', 1)) ~> sink1"
 			]
 		}
 	}
