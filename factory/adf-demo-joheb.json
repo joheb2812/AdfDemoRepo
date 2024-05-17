@@ -6,6 +6,9 @@
 				"type": "string",
 				"value": "input-data/Input/department.csv"
 			}
+		},
+		"globalConfigurations": {
+			"PipelineBillingEnabled": "true"
 		}
 	},
 	"location": "eastus",
