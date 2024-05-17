@@ -10,7 +10,8 @@
 		"globalConfigurations": {
 			"PipelineBillingEnabled": "true",
 			"factoryStagingLSReferenceName": "linked_service_pipeline1",
-			"factoryStagingLSType": "LinkedServiceReference"
+			"factoryStagingLSType": "LinkedServiceReference",
+			"factoryStagingFolderPath": "output-data"
 		}
 	},
 	"location": "eastus",
