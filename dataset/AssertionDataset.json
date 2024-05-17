@@ -10,7 +10,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"fileName": "forDataAssertion.csv",
+				"fileName": "employee.js",
 				"folderPath": "Input",
 				"container": "input-data"
 			},
