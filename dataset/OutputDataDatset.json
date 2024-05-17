@@ -2,7 +2,7 @@
 	"name": "OutputDataDatset",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "linked_service_pipeline1",
+			"referenceName": "AzureBlobStorage2",
 			"type": "LinkedServiceReference"
 		},
 		"annotations": [],
@@ -10,6 +10,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
+				"folderPath": "output",
 				"container": "output-data"
 			},
 			"columnDelimiter": ",",

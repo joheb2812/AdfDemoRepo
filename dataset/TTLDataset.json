@@ -1,5 +1,5 @@
 {
-	"name": "windowDataset",
+	"name": "TTLDataset",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureBlobStorage2",
@@ -10,7 +10,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"fileName": "emp_window.csv",
+				"fileName": "sales_1.csv",
 				"folderPath": "Input",
 				"container": "input-data"
 			},
@@ -21,34 +21,17 @@
 		},
 		"schema": [
 			{
-				"name": "empid",
+				"name": "Name",
 				"type": "String"
 			},
 			{
-				"name": "firstname",
+				"name": "Items",
 				"type": "String"
 			},
 			{
-				"name": "Gender",
-				"type": "String"
-			},
-			{
-				"name": "Country",
-				"type": "String"
-			},
-			{
-				"name": "salary",
-				"type": "String"
-			},
-			{
-				"name": "reportsto",
-				"type": "String"
-			},
-			{
-				"name": "department",
+				"name": "Quantities",
 				"type": "String"
 			}
 		]
-	},
-	"type": "Microsoft.DataFactory/factories/datasets"
+	}
 }
