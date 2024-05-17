@@ -1,5 +1,5 @@
 {
-	"name": "dataflow1",
+	"name": "CastTransDataflow",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
@@ -9,7 +9,7 @@
 						"referenceName": "castDataset",
 						"type": "DatasetReference"
 					},
-					"name": "source1"
+					"name": "Employees"
 				}
 			],
 			"sinks": [
@@ -18,19 +18,19 @@
 						"referenceName": "OutputDataDatset",
 						"type": "DatasetReference"
 					},
-					"name": "sink1"
+					"name": "GoodDataSink1"
 				},
 				{
 					"dataset": {
 						"referenceName": "OutputDataDatset",
 						"type": "DatasetReference"
 					},
-					"name": "sink2"
+					"name": "BadDataSink2"
 				}
 			],
 			"transformations": [
 				{
-					"name": "cast1"
+					"name": "castDateDepatmentDate"
 				},
 				{
 					"name": "split1"
@@ -47,27 +47,27 @@
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
-				"     ignoreNoFilesFound: false) ~> source1",
-				"source1 cast(output(",
+				"     ignoreNoFilesFound: false) ~> Employees",
+				"Employees cast(output(",
 				"          empId as integer,",
 				"          name as string,",
 				"          Date as date 'yyyy/MM/dd'",
 				"     ),",
-				"     errors: true) ~> cast1",
-				"cast1 split(!isError(),",
+				"     errors: true) ~> castDateDepatmentDate",
+				"castDateDepatmentDate split(!isError(),",
 				"     disjoint: false) ~> split1@(goodDateData, badDateData)",
 				"split1@goodDateData sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     partitionFileNames:['goodDateData.csv'],",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     partitionBy('hash', 1)) ~> sink1",
+				"     partitionBy('hash', 1)) ~> GoodDataSink1",
 				"split1@badDateData sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     partitionFileNames:['badDateData.csv'],",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true,",
-				"     partitionBy('hash', 1)) ~> sink2"
+				"     partitionBy('hash', 1)) ~> BadDataSink2"
 			]
 		}
 	}
